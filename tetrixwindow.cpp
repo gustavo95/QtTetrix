@@ -52,9 +52,10 @@
 
 #include "tetrixboard.h"
 #include "tetrixwindow.h"
+#include <QDebug>
 
 //! [0]
-TetrixWindow::TetrixWindow()
+TetrixWindow::TetrixWindow() : m_gamepad(0)
 {
     board = new TetrixBoard;
 //! [0]
@@ -73,20 +74,70 @@ TetrixWindow::TetrixWindow()
     linesLcd = new QLCDNumber(5);
     linesLcd->setSegmentStyle(QLCDNumber::Filled);
 
-//! [2]
-    startButton = new QPushButton(tr("&Start"));
-    startButton->setFocusPolicy(Qt::NoFocus);
-    quitButton = new QPushButton(tr("&Quit"));
-    quitButton->setFocusPolicy(Qt::NoFocus);
-    pauseButton = new QPushButton(tr("&Pause"));
-//! [2] //! [3]
-    pauseButton->setFocusPolicy(Qt::NoFocus);
-//! [3] //! [4]
+    //Label
 
-    connect(startButton, SIGNAL(clicked()), board, SLOT(start()));
-//! [4] //! [5]
-    connect(quitButton , SIGNAL(clicked()), qApp, SLOT(quit()));
-    connect(pauseButton, SIGNAL(clicked()), board, SLOT(pause()));
+    auto gamepads = QGamepadManager::instance()->connectedGamepads();
+    if (gamepads.isEmpty()) {
+        qDebug() << "No ds4 found";
+        return;
+    }
+    m_gamepad = new QGamepad(*gamepads.begin(), this);
+
+    connect(m_gamepad, &QGamepad::buttonBChanged, this, [&](bool pressed){
+        if(pressed)
+            board->start();
+    });
+    connect(m_gamepad, &QGamepad::buttonYChanged, this, [&](bool pressed){
+        if(pressed)
+            qApp->quit();
+    });
+    connect(m_gamepad, &QGamepad::buttonAChanged, this, [&](bool pressed){
+        if(pressed)
+            board->pause();
+    });
+
+    connect(m_gamepad, &QGamepad::buttonUpChanged, this, [&](bool pressed){
+        if(pressed){
+            Qt::Key key = Qt::Key_Up;
+            QKeyEvent* event = new QKeyEvent(QKeyEvent::KeyPress,
+                                             key,
+                                             Qt::NoModifier,
+                                             QKeySequence(key).toString());
+            board->keyPressEvent(event);
+        }
+    });
+    connect(m_gamepad, &QGamepad::buttonLeftChanged, this, [&](bool pressed){
+        if(pressed){
+            Qt::Key key = Qt::Key_Left;
+            QKeyEvent* event = new QKeyEvent(QKeyEvent::KeyPress,
+                                             key,
+                                             Qt::NoModifier,
+                                             QKeySequence(key).toString());
+            board->keyPressEvent(event);
+        }
+    });
+    connect(m_gamepad, &QGamepad::buttonRightChanged, this, [&](bool pressed){
+        if(pressed){
+            Qt::Key key = Qt::Key_Right;
+            QKeyEvent* event = new QKeyEvent(QKeyEvent::KeyPress,
+                                             key,
+                                             Qt::NoModifier,
+                                             QKeySequence(key).toString());
+            board->keyPressEvent(event);
+        }
+    });
+    connect(m_gamepad, &QGamepad::buttonDownChanged, this, [&](bool pressed){
+        if(pressed){
+            Qt::Key key = Qt::Key_D;
+            QKeyEvent* event = new QKeyEvent(QKeyEvent::KeyPress,
+                                             key,
+                                             Qt::NoModifier,
+                                             QKeySequence(key).toString());
+            board->keyPressEvent(event);
+        }
+    });
+
+
     connect(board, SIGNAL(scoreChanged(int)), scoreLcd, SLOT(display(int)));
     connect(board, SIGNAL(levelChanged(int)), levelLcd, SLOT(display(int)));
     connect(board, SIGNAL(linesRemovedChanged(int)),
@@ -99,14 +150,11 @@ TetrixWindow::TetrixWindow()
     layout->addWidget(nextPieceLabel, 1, 0);
     layout->addWidget(createLabel(tr("LEVEL")), 2, 0);
     layout->addWidget(levelLcd, 3, 0);
-    layout->addWidget(startButton, 4, 0);
     layout->addWidget(board, 0, 1, 6, 1);
     layout->addWidget(createLabel(tr("SCORE")), 0, 2);
     layout->addWidget(scoreLcd, 1, 2);
     layout->addWidget(createLabel(tr("LINES REMOVED")), 2, 2);
     layout->addWidget(linesLcd, 3, 2);
-    layout->addWidget(quitButton, 4, 2);
-    layout->addWidget(pauseButton, 5, 2);
     setLayout(layout);
 
     setWindowTitle(tr("Tetrix"));

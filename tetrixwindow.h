@@ -53,6 +53,7 @@
 
 #include <QFrame>
 #include <QWidget>
+#include <QtGamepad/QGamepad>
 
 QT_BEGIN_NAMESPACE
 class QLCDNumber;
@@ -72,6 +73,7 @@ public:
 private:
     QLabel *createLabel(const QString &text);
 
+    QGamepad *m_gamepad;
     TetrixBoard *board;
     QLabel *nextPieceLabel;
     QLCDNumber *scoreLcd;

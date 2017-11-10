@@ -76,6 +76,7 @@ public:
 public slots:
     void start();
     void pause();
+    void keyPressEvent(QKeyEvent *event) override;
 
 signals:
     void scoreChanged(int score);
@@ -84,7 +85,6 @@ signals:
 
 protected:
     void paintEvent(QPaintEvent *event) override;
-    void keyPressEvent(QKeyEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
 //! [0]
 
