@@ -52,19 +52,12 @@
 
 #include <stdlib.h>
 
-#include <QtGamepad>
-
 #include "tetrixwindow.h"
 
-int main(int argc, char *argv[]) : m_gamepad(0)
+int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     TetrixWindow window;
-    auto gamepads = QGamepadManager::instance()->connectedGamepads();
-    if (gamepads.isEmpty()) {
-        return -1;
-    }
-    m_gamepad = new QGamepad(*gamepads.begin(), this);
     window.show();
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
     return app.exec();
