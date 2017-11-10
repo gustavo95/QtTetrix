@@ -87,7 +87,7 @@ TetrixWindow::TetrixWindow() : m_gamepad(0)
         if(pressed)
             board->start();
     });
-    connect(m_gamepad, &QGamepad::buttonYChanged, this, [&](bool pressed){
+    connect(m_gamepad, &QGamepad::buttonXChanged, this, [&](bool pressed){
         if(pressed)
             qApp->quit();
     });
